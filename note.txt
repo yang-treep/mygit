@@ -1,5 +1,5 @@
-笔记
-    /bin 目录（常用文件介绍）
+笔记本:
+      /bin 目录（常用文件介绍）
 　　examples：目录下包含Jmeter使用实例
 　　ApacheJMeter.jar：JMeter源码包
 　　jmeter.bat：windows下启动文件
