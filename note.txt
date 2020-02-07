@@ -1,0 +1,35 @@
+    笔记本
+    /bin 目录（常用文件介绍）
+　　examples：目录下包含Jmeter使用实例
+　　ApacheJMeter.jar：JMeter源码包
+　　jmeter.bat：windows下启动文件
+　　jmeter.sh：Linux下启动文件
+　　jmeter.log：Jmeter运行日志文件
+　　jmeter.properties：Jmeter配置文件
+　　jmeter-server.bat：windows下启动负载生成器服务文件
+　　jmeter-server：Linux下启动负载生成器文件
+　　/docs目录——Jmeter帮助文档
+　　/extras目录——提供了对Ant的支持文件，可也用于持续集成
+　　/lib目录——存放Jmeter依赖的jar包，同时安装插件也放于此目录
+　　/licenses目录——软件许可文件，不用管
+　　/printable_docs目录——Jmeter用户手册
+使用jmeter需要了解什么？接口与接口之间的联系怎么处理？
+　　· 我们必须了解接口的工作原理
+　　· 需要掌握http中的get和post请求原理
+　　· 需要掌握请求头，响应头，请求体个个字段代表什么意思，并且字段的返回值的各代的含义是什么？
+　　· 响应的状态码各代表什么含义·
+　　· json是什么？
+　　· 接口测试用例的设计方法，以及测试时点
+　　接口之间的联系：
+　　接口与接口之间存在联系，比如上个接口的返回值是下一个接口的入参，那我们就要在上个接口返回值赋值变量，供下一个接口调用。
+
+一、 影响范围与生命周期划分
+WEB是基于HTTP协议的，HTTP协议是无状态的。无状态是指无法直接通过HTTP连接的相关属性来鉴别用户状态。但实际上的WEB应用通常是需要以用户会话的形式来支撑业务运行的，比如：购物车，BBS，在线交易等。因此常见的WEB服务端技术（如ASP，JSP），把WEB对象影响范围划分为4个生命周期page、request、session、application，并且通过一些扩展来实现对会话的支持。
+二、 实现原理及技术
+1． page范围，通常是在页面中定义的变量，这个变量的生命周期在页面运行完成后就会结束。
+2． request范围，通常是请求过程中附带的参数，在这个请求被响应后这些参数的生命周期结束。request参数有表单值或URL中的查询串等，这两种值使用request.getParameter()可以得到。request范围的变量还包括在请求处理过程中设置的属性，就是request.setAtrribute()设定的值，通过request.getAtrribute()来得到。请求是可以进行一次或多次传递的，它分为两种，请求转发和跳转。请求转发是使用request.getRequestDispatcher("path").forward(request,response)的形式和Include的形式(path必须在同一个webApp内)，此时这个请求中所有的Paramter和Atrribute都会向下传递。跳转方式是response.sendRedirect("url")的形式(url无限制)，跳转方式实际是向客户端发送了一个301响应，在HTTP头中包含了新的URL，由客户端重新向新的URL进行GET请求。
+3． session范围。session就是会话，因为HTTP的无状态特性所以想实现会话的功能，必须在每一个请求和响应上附加一个ID来标识一次会话。服务端一般通过两种技术来标识会话。第一种是使用cookie技术，cookie是一种客户端技术，它是用户浏览器提供的功能，通常是以一个受访问域和大小限制的文本文件在客户端进行储存的，在每次请求时都附带在HTTP头中。在JSP中是JSESSIONID=XXXX的形式，通过TcpMoniter可以看到。但是cookie受限于浏览器，如果浏览器没有cookie功能或者用户关闭了cookie功能的话这时候就无法标识会话（在早期的BBS登陆时通常会看到使用本论坛必须开启cookie支持）。另一种技术是使用URL重写，就是说在每一个URL的后面附加一个参数JSESSIONID=XXXX进行标识。在JSP中提供了response.encodeRedirectURL()方法来自动在URL中添加这个参数。WEB服务器根据这个ID在内容中存储与这个会话相关的数据。由于不能及时检测到用户的退出行为同时为了控制内存使用，WEB服务器一般采用超时时间
+4． application范围。就是在内存中开辟一块全局共享的区域同一个webApp中的程序都可以进行读写，一般用于全局变量和常量等。
+三、 使用方法
+JSP中一共内置了9个隐含对象page（JSP本身，或者讲是编译后的Servlet）、config（存放着一些Servlet 初始的参数）、request（包含HTTP头和请求相关的参数值等）、response（将JSP 处理数据后的结果传回到客户端，可以设定HTTP头，响应状态码，URL重写等）、out（把结果输出到网页上）、session（表示目前用户的会话状况）、application（用在存取环境的信息）、pageContext（存取其他隐含对象，及对象属性）、exception（若要使用exception 对象时，必须在page 指令中设定。<%@ page isErrorPage="true" %>才能使用）。包含了前面的4个表示范围的对象。
+在Servlet中提供了doPOST和doGET方法，request和response是方法的参数。可以通过request.getSession()取得session对象，通过super.getServletContext()取得application对象。
